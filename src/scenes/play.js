@@ -30,13 +30,13 @@ export class GameplayScene {
 
     this.banners = [];
 
-    this.tries = 0; 
+    this.tries = 0;
     this._started = false;
     this._runStartMs = 0;
     this._runTimeMs = 0;
 
     this._doorHold = 0;
-    this._doorHoldNeed = 0.7; 
+    this._doorHoldNeed = 0.7;
     this._nearDoor = false;
     this._needCoins = 0;
 
@@ -364,6 +364,6 @@ export class GameplayScene {
       by += 64;
     }
 
-    drawText(ctx, "Q: Rooms page   Esc: Level Select", 16, this.engine.height - 28, 14, "rgba(231,238,247,0.65)");
+    drawText(ctx, "Q: Rooms page   Esc: Level Select", 16, this.engine.height - 16 - 14, 14, "rgba(231,238,247,0.65)");
   }
 }

@@ -29,12 +29,12 @@ export class RoomsOverlayScene {
     });
 
     this.btnLeft = new Button({
-      x: this.px + 500, y: this.py + 290, w: 56, h: 56,
+      x: 0, y: 0, w: 56, h: 56,
       label: "⟲",
       onClick: () => this._rotateSelected(-1)
     });
     this.btnRight = new Button({
-      x: this.px + 820, y: this.py + 290, w: 56, h: 56,
+      x: 0, y: 0, w: 56, h: 56,
       label: "⟳",
       onClick: () => this._rotateSelected(1)
     });
@@ -105,7 +105,14 @@ export class RoomsOverlayScene {
 
     drawPanel(ctx, this.px, this.py, this.pw, this.ph, 0.92);
     drawText(ctx, "Rooms", this.px + 28, this.py + 20, 30);
-    drawText(ctx, "Select a past room (or the next future room), rotate with E/R or ⟲/⟳.", this.px + 28, this.py + 56, 14, "rgba(231,238,247,0.70)");
+    drawText(
+      ctx,
+      "Select a past room (or the next future room), rotate with E/R or ⟲/⟳.",
+      this.px + 28,
+      this.py + 56,
+      14,
+      "rgba(231,238,247,0.70)"
+    );
     this.btnClose.draw(ctx);
 
     const allowed = this._allowedRoomIndices();
@@ -129,8 +136,15 @@ export class RoomsOverlayScene {
 
       const tag = idx <= this.gameplay.maxVisitedRoom ? "PAST" : "FUTURE";
       drawText(ctx, `Room ${idx + 1}`, listX + 16, y + 12, 16, "rgba(231,238,247,0.92)");
-      drawText(ctx, tag, listX + itemW - 16, y + 12, 12,
-        idx <= this.gameplay.maxVisitedRoom ? "rgba(231,238,247,0.55)" : "rgba(123,241,168,0.75)", "right");
+      drawText(
+        ctx,
+        tag,
+        listX + itemW - 16,
+        y + 12,
+        12,
+        idx <= this.gameplay.maxVisitedRoom ? "rgba(231,238,247,0.55)" : "rgba(123,241,168,0.75)",
+        "right"
+      );
     }
 
     const prevX = this.px + 430;
@@ -141,7 +155,27 @@ export class RoomsOverlayScene {
     drawPanel(ctx, prevX, prevY, prevW, prevH, 0.50);
     drawText(ctx, `Preview: Room ${this.selected + 1}`, prevX + 16, prevY + 14, 18);
 
-    this._drawRoomPreview(ctx, this.gameplay.world.rooms[this.selected], prevX + 18, prevY + 52, prevW - 36, prevH - 98);
+    // draw preview and get the exact grid rect so buttons can align to it
+    const grid = this._drawRoomPreview(
+      ctx,
+      this.gameplay.world.rooms[this.selected],
+      prevX + 18,
+      prevY + 52,
+      prevW - 36,
+      prevH - 98
+    );
+
+    // --- ✅ center buttons on the ACTUAL grid rect ---
+    // The grid is letterboxed inside the preview panel; using its rect fixes the “off center” look.
+    const gap = 44; // distance from grid edge to button center
+    const cy = grid.oy + grid.gh / 2;
+
+    // set positions (Button uses top-left coords)
+    this.btnLeft.x = (grid.ox - gap) - this.btnLeft.w / 2;
+    this.btnLeft.y = cy - this.btnLeft.h / 2;
+
+    this.btnRight.x = (grid.ox + grid.gw + gap) - this.btnRight.w / 2;
+    this.btnRight.y = cy - this.btnRight.h / 2;
 
     this.btnLeft.draw(ctx);
     this.btnRight.draw(ctx);
@@ -149,6 +183,7 @@ export class RoomsOverlayScene {
     drawText(ctx, "E: rotate left   R: rotate right   Esc/X: close", prevX + 16, prevY + prevH - 28, 14, "rgba(231,238,247,0.65)");
   }
 
+  // Returns the drawn grid rect: { ox, oy, gw, gh }
   _drawRoomPreview(ctx, room, x, y, w, h) {
     const N = ROOM_SIZE;
     const pad = 8;
@@ -200,5 +235,7 @@ export class RoomsOverlayScene {
         cell * 1.9
       );
     }
+
+    return { ox, oy, gw, gh };
   }
 }
